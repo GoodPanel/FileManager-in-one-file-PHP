@@ -1080,7 +1080,7 @@ function save_file(path)
 	$('#save_status').html('Loading...'); 	
 	
 	//var text = encodeURIComponent($('#file_content').val());
-	var text = editor.getValue();
+	var text = encodeURIComponent(editor.getValue());
 	
 		$.ajax({  
 			type: 'POST',  
