@@ -197,31 +197,40 @@ function copy_path($path, $to)
     }
 }
 #############################################################################
-function add_zip($zip, $path, $name, $dir = '')
+function add_zip($zip, $path, $dir)
 {
-		if(file_exists($path))
+	if(file_exists($path))
+	{
+		if(is_dir($path)) 
 		{
-			if(is_dir($path)) 
+			if(empty($dir))
 			{
 				$dir = basename($path);
-				if($zip->addEmptyDir($dir)) 
+			}
+			if($zip->addEmptyDir($dir)) 
+			{
+				foreach(scandir($path) as $f) 
 				{
-					foreach(scandir($path) as $f) 
+					if($f != '.' and $f != '..') 
 					{
-						if($f != '.' and $f != '..') 
+						if(is_dir($path.'/'.$f)) 
 						{
-							add_zip($zip, $path.'/'.$f, $f, $dir);
+							add_zip($zip, $path.'/'.$f, $dir.'/'.$f);
 						}
+						else{
+							$zip->addFile($path.'/'.$f, $dir.'/'.$f);
+						}						
 					}
-				}
-				else{
-					echo 'Error create folder: '.$dir;
 				}
 			}
 			else{
-				$zip->addFile($path, $dir.'/'.basename($path));
+				echo 'Error create folder: '.$dir;
 			}
 		}
+		else{
+			$zip->addFile($path, $dir.'/'.basename($path));
+		}
+	}
 }
 function create_zip($path, $name)
 {
@@ -229,7 +238,7 @@ function create_zip($path, $name)
 	$zip = new ZipArchive;
 	if($zip->open($p.$name.'.zip', ZIPARCHIVE::CREATE) === true)
 	{
-		add_zip($zip, $path, $name);
+		add_zip($zip, $path, '');
 		$zip->close();
 		echo '<script type="text/javascript">open_folder(\''.$p.'\')</script>';
 	}
@@ -464,7 +473,7 @@ if(!empty($_POST['open_file']))
 		{
 			 for($i=0; $i<$zip->numFiles; $i++)
 			 {
-				 echo $i.') '.$zip->getNameIndex($i).'<br>';
+				 echo '<br>'.$i.') '.$zip->getNameIndex($i).'';
 			 }
 		}
 		else{
